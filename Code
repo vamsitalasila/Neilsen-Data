@@ -1,0 +1,52 @@
+import pandas as pd
+import numpy as np
+import seaborn as sbn
+import matplotlib.pyplot as plt
+df=pd.read_csv("../input/mall-customers/Mall_Customers.csv")
+df
+df.rename(columns={'Genre':'gender','Age':'age','Annual Income (k$)':'income','Spending Score (1-100)':'score'},inplace=True)
+df
+df.isnull().values.any()
+df.isnull().sum()
+df.shape
+df.describe()
+sbn.pairplot(df[['age','income','score']])
+x=df.iloc[:,2:4]
+y=df.score
+from sklearn.cluster import KMeans
+kmeans=KMeans(n_clusters=2)
+kmeans.fit(df[['age','score']])
+kmeans.cluster_centers_
+df['age_cluster']=kmeans.labels_
+df['age_cluster'].value_counts()
+sbn.scatterplot(x='age',y='score',hue='age_cluster',data=df)
+kmeans2=KMeans(n_clusters=5)
+kmeans2.fit(df[['income','score']])
+kmeans2.cluster_centers_
+df['income_cluster']=kmeans2.labels_
+df['income_cluster'].value_counts()
+sbn.scatterplot(x='income',y='score',hue='income_cluster',data=df)
+from sklearn.cluster import KMeans
+K_range=range(1,12)
+wcss=[]
+for k in K_range:
+    km=KMeans(n_clusters=k)
+    km.fit(df[['age','score']])
+    OMP_NUM_THREADS=1
+    wcss.append(km.inertia_)
+wcss
+import matplotlib.pyplot as plt
+plt.xlabel('Number of cluster(K)')
+plt.ylabel('Sum of squared error(WCSS)')
+plt.plot(K_range,wcss)
+plt.title('Elbow method')
+wcss2=[]
+for k in K_range:
+    km2=KMeans(n_clusters=k)
+    km2.fit(df[['income','score']])
+    OMP_NUM_THREADS=1
+    wcss2.append(km2.inertia_)
+    plt.xlabel('Number of cluster(K)')
+plt.ylabel('Sum of squared error(WCSS2)')
+plt.plot(K_range,wcss2)
+plt.title('Elbow method')
